@@ -1,23 +1,32 @@
-import { Menu } from "./types"
+import { SHOPIFY_GRAPHQL_API_ENDPOINT, TAGS } from "../constants";
+import { isShopifyError } from "../type-guards";
+import { ensureStartWith } from "../utils";
+import { getMenuQuery } from "./queries/menu";
+import { Menu, ShopifyMenuOperation } from "./types"
 
+const domain = process.env.SHOPIFY_STORE_DOMAIN ? ensureStartWith(process.env.SHOPIFY_STORE_DOMAIN, 'https://') : "";
+
+const endpoint = `${domain}${SHOPIFY_GRAPHQL_API_ENDPOINT}`
+const key = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN
+type ExtractVariables<T> = T extends { variables: object } ? T["variables"] : never;
 export async function shopifyFetch<T>({
   cache = "force-cache",
   headers,
   query,
   tags,
-  varaibles,
+  variables,
 }: {
   cache?: RequestCache;
-  headers: HeadersInit;
+  headers?: HeadersInit;
   query: string;
   tags?: string[];
-  varaibles?: ExtractVariables<T>;
+  variables?: ExtractVariables<T>;
 }): Promise<{status: number; body: T} | never> {
   try {
     const result = fetch(endpoint, {
       method: "POST",
       headers: {
-        "Content-Type": "Application/json",
+        "Content-Type": "application/json",
         "X-Shopify-Storefront-Access-Token": key,
         ...headers,
       },
@@ -56,22 +65,22 @@ export async function shopifyFetch<T>({
   }
 }
 
-export async function getMenu(handle:string): Promise<Menu[]> {
-  const res = await shopifyFetch<shopifyMenuOperation>({
+export async function getMenu(handle: string): Promise<Menu[]> {
+  const res = await shopifyFetch<ShopifyMenuOperation>({
     query: getMenuQuery,
     tags: [TAGS.collections],
     variables: {
       handle,
     },
-  })
+  });
 
   return (
-    res.body?.data?.menu?.items.map((item: {title: string, url: string})=>{
+    res.body?.data?.menu?.items.map((item: { title: string; url: string }) => ({
       title: item.title,
       path: item.url
         .replace(domain, "")
         .replace("/collections", "/search")
-        .replace("/pages", "")
-    })
-  )
+        .replace("/pages", ""),
+    })) || []
+  );
 }
