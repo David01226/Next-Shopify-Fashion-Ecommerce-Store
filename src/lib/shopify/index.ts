@@ -23,7 +23,7 @@ export async function shopifyFetch<T>({
   variables?: ExtractVariables<T>;
 }): Promise<{status: number; body: T} | never> {
   try {
-    const result = fetch(endpoint, {
+    const result = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
