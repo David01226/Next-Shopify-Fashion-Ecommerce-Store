@@ -4,7 +4,7 @@ import Link from "next/link"
 import React from 'react'
 import MobileMenu from "./MobileMenu"
 import Search from "./Search"
-import Logo from "@/components/icons/logo"
+import LogoSquare from "@/components/LogoSquare"
 
 const NavBar = async () => {
   const menu = await getMenu("next-js-frontend-nav")
@@ -17,10 +17,10 @@ const NavBar = async () => {
       <div className="flex w-full items-center">
         <div className="flex w-full md:w-1/3">
           <Link href={"/"} prefetch={true} className="mr-2 flex w-full items-center justify-center md:w-auto lg:mr-6">
-            <Logo />
-            <div className="ml-2 flex-none text-sm font-medium uppercase md:hidden lg:block">
+            <LogoSquare />
+            {/* <div className="ml-2 flex-none text-sm font-medium uppercase md:hidden lg:block">
               {process.env.SITE_NAME}
-            </div>
+            </div> */}
           </Link>
           {menu.length > 0 ? (
             <ul className="hidden gap-6 text-sm md:flex md:items-center">

@@ -2,7 +2,8 @@ import { SHOPIFY_GRAPHQL_API_ENDPOINT, TAGS } from "../constants";
 import { isShopifyError } from "../type-guards";
 import { ensureStartWith } from "../utils";
 import { getMenuQuery } from "./queries/menu";
-import { Menu, ShopifyMenuOperation } from "./types"
+import { getProductQuery } from "./queries/products";
+import { Menu, Product, ShopifyMenuOperation, ShopifyProductsOperation } from "./types"
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN ? ensureStartWith(process.env.SHOPIFY_STORE_DOMAIN, 'https://') : "";
 
@@ -83,4 +84,26 @@ export async function getMenu(handle: string): Promise<Menu[]> {
         .replace("/pages", ""),
     })) || []
   );
+}
+
+export async function getProducts({ 
+  query,
+  reverse,
+  sortKey 
+}: {
+  query?: string; 
+  reverse?: boolean;
+  sortKey?: string;
+}): Promise<Product[]> {
+  const res = await shopifyFetch<ShopifyProductsOperation>({
+    query: getProductQuery,
+    tags: [TAGS.products],
+    variables: {
+      query,
+      reverse,
+      sortKey
+    }
+  })
+
+  return reshapeProducts()
 }
