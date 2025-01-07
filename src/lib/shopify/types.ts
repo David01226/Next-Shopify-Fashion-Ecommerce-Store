@@ -18,8 +18,8 @@ export type ShopifyMenuOperation = {
 };
 
 export type Money = {
-  title: string;
-  path: string;
+  amount: string;
+  currencyCode: string;
 }
 
 export type Edge<T> = {

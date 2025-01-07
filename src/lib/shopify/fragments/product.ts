@@ -1,8 +1,8 @@
 import imageFragment from "./image";
 import seoFragment from "./seo";
 
-export const productFragment = /* GraphQL */ `
-  fragment product on Product {
+export const productFragment = /* GraphQl */ `
+    fragment product on Product {
     id
     handle
     availableForSale
@@ -59,5 +59,4 @@ export const productFragment = /* GraphQL */ `
     }
     ${imageFragment}
     ${seoFragment}
-  }
 `;

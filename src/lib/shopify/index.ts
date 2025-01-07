@@ -2,7 +2,7 @@ import { HIDDEN_PRODUCT_TAG, SHOPIFY_GRAPHQL_API_ENDPOINT, TAGS } from "../const
 import { isShopifyError } from "../type-guards";
 import { ensureStartWith } from "../utils";
 import { getMenuQuery } from "./queries/menu";
-import { getProductQuery } from "./queries/products";
+import { getProductsQuery } from "./queries/products";
 import { Connection, Image, Menu, Product, ShopifyMenuOperation, ShopifyProduct, ShopifyProductsOperation } from "./types"
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN ? ensureStartWith(process.env.SHOPIFY_STORE_DOMAIN, 'https://') : "";
@@ -134,24 +134,24 @@ export async function getMenu(handle: string): Promise<Menu[]> {
   );
 }
 
-export async function getProducts({ 
+export async function getProducts({
   query,
   reverse,
-  sortKey 
+  sortKey,
 }: {
-  query?: string; 
+  query?: string;
   reverse?: boolean;
   sortKey?: string;
 }): Promise<Product[]> {
   const res = await shopifyFetch<ShopifyProductsOperation>({
-    query: getProductQuery,
+    query: getProductsQuery,
     tags: [TAGS.products],
     variables: {
       query,
       reverse,
-      sortKey
-    }
-  })
+      sortKey,
+    },
+  });
 
-  return reshapeProducts(removeEdgesAndNodes(res.body.data.products))
+  return reshapeProducts(removeEdgesAndNodes(res.body.data.products));
 }

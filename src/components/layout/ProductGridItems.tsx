@@ -2,6 +2,7 @@ import { Product } from "@/lib/shopify/types"
 import Link from "next/link"
 import React from 'react'
 import GridTileImage from "../grid/GridTileImage"
+import Grid from "../grid"
 
 export default function ProductGridItems({ products }: { products: Product[] }) {
   return (
@@ -9,7 +10,17 @@ export default function ProductGridItems({ products }: { products: Product[] }) 
       {products.map((product) => (
         <Grid.Item key={product.handle} className="animate-fadeIn">
           <Link href={`product/${product.handle}`} className="relative inline-block h-full w-full" prefetch={true}>
-            <GridTileImage/>
+            <GridTileImage
+              alt={product.title}
+              label={{
+                title: product.title,
+                amount: product.priceRange.maxVariantPrice.amount,
+                currencyCode: product.priceRange.maxVariantPrice.currencyCode,
+              }}
+              src={product.featuredImage?.url}
+              fill
+              sizes="(min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
+            />
           </Link>
         </Grid.Item>
       ))}

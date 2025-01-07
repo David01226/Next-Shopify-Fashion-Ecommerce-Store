@@ -1,8 +1,9 @@
 import Grid from "@/components/grid"
+import ProductGridItems from "@/components/layout/ProductGridItems"
 import { defaultSort, sorting } from "@/lib/constants"
 import { getProducts } from "@/lib/shopify"
 
-export async function SearchPage({
+export default async function SearchPage({
   searchParams
 }: {
   searchParams?: { [key:string]: string | string[] | undefined }
