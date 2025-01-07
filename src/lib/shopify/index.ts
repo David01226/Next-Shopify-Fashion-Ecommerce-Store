@@ -1,9 +1,9 @@
-import { SHOPIFY_GRAPHQL_API_ENDPOINT, TAGS } from "../constants";
+import { HIDDEN_PRODUCT_TAG, SHOPIFY_GRAPHQL_API_ENDPOINT, TAGS } from "../constants";
 import { isShopifyError } from "../type-guards";
 import { ensureStartWith } from "../utils";
 import { getMenuQuery } from "./queries/menu";
 import { getProductQuery } from "./queries/products";
-import { Menu, Product, ShopifyMenuOperation, ShopifyProductsOperation } from "./types"
+import { Connection, Image, Menu, Product, ShopifyMenuOperation, ShopifyProduct, ShopifyProductsOperation } from "./types"
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN ? ensureStartWith(process.env.SHOPIFY_STORE_DOMAIN, 'https://') : "";
 
@@ -66,6 +66,54 @@ export async function shopifyFetch<T>({
   }
 }
 
+function removeEdgesAndNodes<T>(array: Connection<T>): T[] {
+  return array.edges.map((edge) => edge?.node)
+}
+
+function reshapeImages(images: Connection<Image>, productTitle: string) {
+  const flattened = removeEdgesAndNodes(images);
+
+  return flattened.map((image) => {
+    const filename = image.url.match(/.*\/(.*)\..*/)?.[1];
+
+    return {
+      ...image,
+      altText: image.altText || `${productTitle} - ${filename}`,
+    }
+  })
+}
+
+function reshapeProduct(product: ShopifyProduct, filterHiddenProducts: boolean = true) {
+  if (!product || (filterHiddenProducts && product.tags.includes(HIDDEN_PRODUCT_TAG))) {
+    return undefined;
+  }
+
+  const { images, variants, ...rest } = product
+
+  return {
+    ...rest,
+    images: reshapeImages(images, product.title),
+    variants: removeEdgesAndNodes(variants)
+  }
+
+}
+  
+function reshapeProducts(products: ShopifyProduct[]) {
+  const reshapedProducts = [];
+
+  for (const product of products) {
+    if (product) {
+      const reshapedProduct = reshapeProduct(product);
+
+      if (reshapedProduct) {
+        reshapedProducts.push(reshapedProduct);
+      }
+    }
+  }
+
+  return reshapedProducts;
+}
+
 export async function getMenu(handle: string): Promise<Menu[]> {
   const res = await shopifyFetch<ShopifyMenuOperation>({
     query: getMenuQuery,
@@ -105,5 +153,5 @@ export async function getProducts({
     }
   })
 
-  return reshapeProducts()
+  return reshapeProducts(removeEdgesAndNodes(res.body.data.products))
 }
